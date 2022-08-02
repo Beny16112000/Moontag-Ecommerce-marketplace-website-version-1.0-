@@ -14,6 +14,8 @@ from . tokens import generate_token
 
 
 # Create your views here.
+def git():
+    pass
 
 def home(request):
     return render(request,'index.html')
