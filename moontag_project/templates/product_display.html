@@ -1,0 +1,9 @@
+<h1>All Products</h1>
+{% if user.is_authenticated %}
+<table>
+    {% for i in all %}
+        <tr><td>{{ i }}</td><td>{{ i.img }}</td><td>{{ i.detail }}</td></tr>
+        <td><form method='POST'><input type='hidden' name='id'><input type="submit" value="Remove"></form></td>
+    {% endfor %}
+</table>
+{% endif %}
