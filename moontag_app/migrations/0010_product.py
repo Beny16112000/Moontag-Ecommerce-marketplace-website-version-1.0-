@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('price', models.PositiveBigIntegerField()),
                 ('status', models.BooleanField(default=True)),
                 ('brand', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='moontag_app.brand')),
-                ('catagory', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='moontag_app.category')),
+                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='moontag_app.category')),
                 ('color', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='moontag_app.color')),
                 ('size', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='moontag_app.size')),
             ],
