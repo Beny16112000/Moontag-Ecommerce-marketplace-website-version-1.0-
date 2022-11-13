@@ -1,5 +1,5 @@
 from django import forms
-from moontag_app.models import Product,ProductAttribute
+from moontag_app.models import Product, ProductAttribute
 
 
 
@@ -13,3 +13,4 @@ class ProductAttributeForm(forms.ModelForm):
     class Meta:
         model = ProductAttribute
         fields = ['product','color','size','price','img']
+

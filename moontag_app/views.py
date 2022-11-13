@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render
-from moontag_app.models import Product,Category,Brand,Banner,ProductAttribute,Color,Size,CartOrder,CartOrderItems
-from django.http import JsonResponse
+from moontag_app.models import Product,Category,Brand,Banner,ProductAttribute,Color,Size,CartOrder,CartOrderItems,ProductReview,Wishlist,Vendors, VendorAddProduct,Todo,Withraw
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -17,8 +17,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
-from moontag_app.forms import ProductForm,ProductAttributeForm
+from moontag_app.forms import ProductForm, ProductAttributeForm
 from django.db.models import Avg ,Sum
+import json
+from datetime import datetime
+
+
 
 """
 Mail service login:
@@ -39,7 +43,20 @@ REMAMBER:
     כל הקישורים באתר רלוונטים ויש אותם גם בהדר וגם בפוטר לא לפספס !׳
 """
 
+
+# כדי להגיע לחלק של הריאקט צריך להתחבר 
+
+
+# What i Did untill now for project number 3
+"""
+Product reviews - status: 'False'
+Wishlist - status: 'True'  
+Marketplace - status: 'True'
+"""
+
+
 # Create your views here.
+
 
 def home(request):
     """
@@ -235,11 +252,26 @@ def product_page(request,slug,id):
     """
     Product page for every product
     """
+    if request.method == "POST":
+        username = request.POST['username']
+        product_name = request.POST['product']
+        review_comment = request.POST['comment']
+        stars = request.POST['stars']
+        review = ProductReview(user=username,product=product_name,review_text=review_comment,review_rating=stars)
+        review.save()
+
     product = Product.objects.get(id=id)
+    rewiews = ProductReview.objects.filter(product=product).order_by('-id')
+    if len(rewiews) != 0:
+        get_avg_rating = ProductReview.objects.filter(product=product).aggregate(avg_rating=Avg('review_rating')) # Get the avg for the product ratings
+        avg_rating = "%.1f" % get_avg_rating['avg_rating'] # Short to only one digit after the dot
+    else:
+        avg_rating = 'Still Dont Have Reviews'
+    
     related_products = Product.objects.filter(category=product.category).exclude(id=id)[:4] # exclude for not show the same product in the related products.
-    colors = ProductAttribute.objects.filter(product=product).values('color__id','color__title','color__color_code').distinct() # values meen i am getting the colums and i want to distinct the data
+    colors = ProductAttribute.objects.filter(product=product).values('color__id','color__title','color__color_code').distinct() # values mean i am getting the colums and i want to distinct the data
     sizes = ProductAttribute.objects.filter(product=product).values('size__id','size__title','price','color__id').distinct()
-    return render(request, 'product_page.html',{'data':product,'related_products':related_products,'colors':colors,'sizes':sizes})
+    return render(request, 'product_page.html',{'data':product,'related_products':related_products,'colors':colors,'sizes':sizes,'rewiews':rewiews,'avg':avg_rating})
 
 
 
@@ -290,6 +322,7 @@ def add_to_cart(request):
         'qty':request.GET['qty'],
         'price':request.GET['price'],
     }
+
     if 'cartdata' in request.session:
         if str(request.GET['id']) in request.session['cartdata']:
             cart_data = request.session['cartdata']
@@ -517,7 +550,7 @@ def user_orders(request):
     """
     After click on the your orders in the dashboard page
     """
-    orders = CartOrder.objects.filter(user=request.user).order_by('-id')
+    orders = CartOrder.objects.filter(user=request.user,paid_status=True).order_by('-id')
     return render(request, 'user_orders.html',{'orders':orders})
 
 
@@ -565,6 +598,7 @@ def display_product(request):
     return render(request, 'display_product.html',{'products':products})
 
 
+
 def data(request):
     """
     Data on the website 
@@ -573,3 +607,243 @@ def data(request):
     avg = ProductAttribute.objects.aggregate(Avg('price'))
     total_products = Product.objects.all()
     return render(request, 'data.html', {'avg':avg,'total_products':total_products,'total_price':a})
+
+
+
+@csrf_exempt
+def add_wishlist(request):
+    """
+    Add To Wishlist Product process
+    """
+    if request.method == 'POST':
+        pid = json.loads(request.body)
+        product = Product.objects.get(pk=pid['productId'])
+        data = {}
+        check_product = Wishlist.objects.filter(product=product,user=request.user).count()
+        if check_product > 0:
+            data = {
+                'bool': False
+            }
+        else:
+            wishliast = Wishlist.objects.create(product=product,user=request.user)
+            data = {
+                'bool': True
+            }
+    return JsonResponse(data)
+
+
+
+def wishlist(request):
+    """
+    Wishlist Section
+    """
+    if request.method == 'POST':
+        pid = request.POST['id']
+        remove_product = Wishlist.objects.get(product=pid)
+        remove_product.delete()
+        messages.success(request, 'Removed From Wishlist')
+    products = Wishlist.objects.filter(user=request.user).order_by('-id')
+    return render(request, 'wishlist.html',{'products':products})
+
+
+
+@login_required
+def welcome (request):
+    """
+    Weoclome page React - Username
+    """
+    user = request.user
+    return render(request, 'marketplace/welcome.html', {'user':user})
+
+
+
+@login_required
+def store_register(request):
+    """
+    Vendors Register they store
+    """
+    if request.method == 'POST' and request.FILES['storeImage']:
+        store_name = request.POST['storeName']
+        company_name = request.POST['companyName']
+        store_image = request.FILES['storeImage']
+        business_email = request.POST['businessEmail']
+        payPal_email = request.POST['payPalEmail']
+        if Vendors.objects.filter(store_name=store_name):
+                messages.error(request, "Store already exist! Try other Store Name")
+                return redirect('home')
+        else:
+            brand = Brand.objects.create(title=store_name,img=store_image)
+            brand.save()
+            vendor = Vendors.objects.create(user=request.user,store_name=store_name,company_name=company_name,store_img=store_image,business_email=business_email,pay_pal=payPal_email)
+            vendor.save()
+            messages.success(request, 'The Store Created')
+            return redirect('/store')
+    return render(request, 'marketplace/store_register.html')
+
+
+
+def store(request):
+    """
+    Vendor Admin Panel With many of the data
+    """
+    if len(Vendors.objects.filter(user=request.user)) > 0:
+        vendor = Vendors.objects.get(user=request.user)
+        todos = Todo.objects.filter(user=request.user)
+        vendor_products = VendorAddProduct.objects.filter(user=request.user)
+        li = []
+        for i in vendor_products:
+            products = CartOrderItems.objects.filter(item=i.product).exclude(order__paid_status=False)
+            li.append(products)
+        total_sales = 0
+        for item in li:
+            for p in item:
+                orders = CartOrder.objects.filter(id=int(p.in_num[4:]))
+                total_sales += p.total
+        after_moontag_commission = total_sales - (int(total_sales) * 0.17)
+        """
+        print(datetime.now().date(),orders)
+        for i in li:
+            for b in i:
+                print(b.order.order_dt.date())
+        """
+        if request.method == 'POST':
+            new_task = request.POST['todo']
+            save_task = Todo.objects.create(user=request.user,todo=new_task)
+            save_task.save()
+        return render(request, 'marketplace/index.html', {'user':request.user,'vendor':vendor,'products':li,'total_sales':total_sales,'commission':after_moontag_commission,'todos':todos,'orders':orders,'vendor_products':vendor_products})
+    else:
+        return redirect('/store-register')
+
+
+
+def order_details(request,id):
+    """
+    Order Details in Vendor Store
+    """
+    orders = CartOrderItems.objects.filter(order_id=id)
+    return render(request, 'marketplace/orders_detail.html',{'orders':orders})
+
+
+
+def delete_todo(request):
+    """
+    Delete Todo task in Admin marketplace panel
+    """
+    if request.method == 'POST':
+        todo_id = request.POST['todoId']
+        todo = Todo.objects.get(id=todo_id)
+        todo.delete()
+        return redirect('/store')
+ 
+
+
+def vendor_add_product(request):
+    """
+    Vendor Add his Products
+    """
+    user = request.user
+    vendor = Vendors.objects.get(user=request.user)
+    categories = Category.objects.all()
+    brands = Brand.objects.get(title=vendor.store_name)
+    colors = Color.objects.all()
+    sizes = Size.objects.all()
+    if request.method == 'POST':
+        title = request.POST['title']
+        slug = request.POST['slug']
+        detail = request.POST['detail']
+        specs = request.POST['specs']
+        category = Category.objects.get(id=request.POST['category'])
+        brand = Brand.objects.get(id=request.POST['brand'])
+        color =  Color.objects.get(id=request.POST['color']) 
+        size = Size.objects.get(id=request.POST['size'])
+        product = Product.objects.create(title=title,slug=slug,detail=detail,specs=specs,category=category,brand=brand,color=color,size=size,status=True,is_featured=False)
+        product.save()
+        new_added_product = Product.objects.last()
+        vendor_add_product_model = VendorAddProduct.objects.create(user=request.user,product=new_added_product)
+        vendor_add_product_model.save()
+        messages.success(request, 'Product Added Succefuly Remamber To add Atribute if you want the product will be displayed on our store')
+        return redirect('/store/add-attribute')
+    return render(request, 'marketplace/add_product.html', {'user':user,'vendor':vendor,'category':categories,'brand':brands,'colors':colors,'sizes':sizes})
+
+
+
+def vendor_add_attribute(request):
+    """
+    Add Attribute for vendor products
+    """
+    user = request.user
+    vendor = Vendors.objects.get(user=request.user)
+    user_brand = Brand.objects.get(title=vendor.store_name)
+    products = Product.objects.filter(brand=user_brand.id)
+    colors = Color.objects.all()
+    sizes = Size.objects.all()
+    if request.method == "POST" and request.FILES['img']:
+        product = Product.objects.get(id=request.POST['product'])
+        color = Color.objects.get(id=request.POST['color'])
+        size = Size.objects.get(id=request.POST['size'])
+        price = request.POST['price']
+        img = request.FILES['img']
+        product_attribute = ProductAttribute.objects.create(product=product,color=color,size=size,price=price,img=img)
+        product_attribute.save()
+        messages.success(request, 'Attribute Added Succefuly')
+    return render(request, 'marketplace/add_attribute.html', {'user':user,'vendor':vendor,'products':products,'colors':colors,'sizes':sizes})
+
+
+
+def store_products(request):
+    """
+    Store Products section
+    """
+    user = request.user
+    vendor = Vendors.objects.get(user=request.user)
+    products = VendorAddProduct.objects.filter(user=request.user)
+    return render(request, 'marketplace/products.html', {'user':user,'vendor':vendor,'products':products})
+
+
+
+def vendor_edit_product(request,id):
+    """
+    Vendor Edit his Products
+    """
+    product = Product.objects.get(id=id)
+    if request.method == 'POST':
+        title = request.POST['title']
+        slug = request.POST['slug']
+        detail = request.POST['detail']
+        specs = request.POST['specs']
+        Product.objects.filter(id=id).update(title=title,slug=slug,detail=detail,specs=specs)
+        return redirect('/store/products')
+    return render(request, 'marketplace/edit_product.html', {'product':product})
+
+
+
+def withraw(request):
+    """
+    Vendor Withraw (Get Paid for his sales)
+    """
+    vendor = Vendors.objects.get(user=request.user)
+    vendor_products = VendorAddProduct.objects.filter(user=request.user)
+    li = []
+    for i in vendor_products:
+        products = CartOrderItems.objects.filter(item=i.product).exclude(order__paid_status=False)
+        li.append(products)
+    total_sales = 0
+    for item in li:
+        for p in item:
+            total_sales += p.total
+    after_moontag_commission = total_sales - (int(total_sales) * 0.17)
+    user_withraws = Withraw.objects.filter(user=request.user)
+    what_paid = 0
+    for y in user_withraws:
+        what_paid += int(y.amount)
+    after_moontag_commission -= what_paid
+    if request.method == 'POST':
+        withraw_request = request.POST['withraw']
+        withraw_request_save = Withraw.objects.create(user=request.user,amount=withraw_request)
+        withraw_request_save.save()
+        return redirect('/store/withraw')
+    return render(request, 'marketplace/withraw.html',{'vendor':vendor,'user':request.user,'after_moontag_commission':after_moontag_commission,'total_sales':total_sales,'paid':what_paid})
+
+
+
+

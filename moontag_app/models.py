@@ -124,3 +124,67 @@ class CartOrderItems(models.Model):
 
     def image_tag(self):
         return mark_safe('<img src="/media/%s" width="60" height="60" />' % (self.img))
+
+
+RATING = (
+    (1,'1'),
+    (2,'2'),
+    (3,'3'),
+    (4,'4'),
+    (5,'5'),
+)
+
+class ProductReview(models.Model):
+    user = models.CharField(max_length=100,editable=False)
+    product = models.CharField(max_length=100,editable=False)
+    review_text = models.TextField()
+    review_rating = models.CharField(choices=RATING, max_length=150)
+    
+    class Meta:
+        verbose_name_plural = 'A10. Product Review'
+
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name_plural = 'A11. Wishlist'
+
+class Vendors(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    store_name = models.CharField(max_length=100)
+    company_name = models.CharField(max_length=100)
+    store_img = models.ImageField(upload_to="media/store_images",null=True)
+    business_email = models.EmailField(max_length=254)
+    pay_pal = models.EmailField(max_length=254)
+
+    class Meta:
+        verbose_name_plural = 'A12. Vendors'
+
+    def image_tag(self):
+        return mark_safe('<img src="/media/%s" width="60" height="60" />' % (self.img))
+
+
+class VendorAddProduct(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name_plural = 'A13. Vendors Products'
+
+
+class Todo(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    todo = models.CharField(max_length=200)
+
+    class Meta:
+        verbose_name_plural = 'A14. Todo'
+
+
+class Withraw(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    amount = models.FloatField()
+
+    class Meta:
+        verbose_name_plural = 'A15. Withraw'

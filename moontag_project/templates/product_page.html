@@ -68,21 +68,64 @@
 		</div>
 		<!-- Reviews -->
 		<div class="col-md-6">
-			<h3 class="my-3">Reviews - 4.5/5 <i class="fa fa-star text-warning"></i></h3>
+			<h3 class="my-3">Reviews - <span>{{avg}}</span> <i class="fa fa-star text-warning"></i>
+				{% if user.is_authenticated %}
+				<button type="button" class="btn rewiewButton"data-toggle="modal" data-target="#exampleModal">Add Review</button></h3>
+				{% else %}
+				<a href="/login1" >Login To Add Rewiew</a>
+				{% endif %}
+				<!--Modal-->
+				<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+					  <div class="modal-content">
+						<div class="modal-header">
+						  <h5 class="modal-title" id="exampleModalLabel">Product Rewiew</h5>
+						  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						  </button>
+						</div>
+						<div class="modal-body">
+							<form method="POST">
+								{% csrf_token %}							
+								<table class="table table-bordered">
+									<form method="post" action="/save-rewiew" id="rewiewForm">
+										<input name="comment" class="comment" type="text"></input>
+										<br>
+										<select name="stars" class="stars">
+											<option value="1">1</option>
+											<option value="2">2</option>
+											<option value="3">3</option>
+											<option value="4">4</option>
+											<option value="5">5</option>
+										</select>
+										<br>
+										<input type="hidden" name="username" value="{{user}}">
+										<input type="hidden" name="product" value="{{data}}">
+										<button class="reviewButton" type="submit">Add Rewiew</button>
+									</form>
+								</table>
+							</form>
+						</div>
+					  </div>
+					</div>
+				  </div>
+				<!--Modal End-->
 			<div class="card">
 				<div class="card-body" style="max-height: 400px; overflow: auto;">
 					<!-- Detail -->
+					{% for review in rewiews %}
 					<blockquote class="blockquote text-right">
-					  <small>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</small>
-					  <footer class="blockquote-footer">User 
+					  <small>{{review.review_text}}</small>
+					  <footer class="blockquote-footer">{{review.user}} 
 					  	<cite title="Source Title">
-					  		<i class="fa fa-star text-warning"></i>
-					  		<i class="fa fa-star text-warning"></i>
-					  		<i class="fa fa-star text-warning"></i>
-					  		<i class="fa fa-star text-warning"></i>
+							<!---->
+							{% for star in review.review_rating|ljust:review.review_rating %}
+							<i class="fa fa-star text-warning"></i>
+						  	{% endfor %}
 					  	</cite>
 					  </footer>
 					</blockquote>
+					{% endfor %}
 					<hr />
 				</div>
 			</div>

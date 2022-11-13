@@ -1,8 +1,8 @@
 from django.contrib import admin
-from moontag_app.models import Category,Color,Size,Brand,Product,ProductAttribute,Banner,CartOrder,CartOrderItems
+from moontag_app.models import Category,Color,Size,Brand,Product,ProductAttribute,Banner,CartOrder,CartOrderItems,ProductReview,Wishlist,Vendors,VendorAddProduct,Todo,Withraw
+
+
 # Register your models here.
-admin.site.register(Brand)
-admin.site.register(Size)
 
 
 class BannerAdmin(admin.ModelAdmin):
@@ -33,3 +33,35 @@ admin.site.register(CartOrder, CartOrderAdmin)
 class CartOrderItemsAdmin(admin.ModelAdmin):
     list_display = ('in_num','item','image_tag','qty','price','total')
 admin.site.register(CartOrderItems, CartOrderItemsAdmin)
+
+class ProductReviewAdmin(admin.ModelAdmin):
+    list_display = ('user','product','review_text','review_rating')
+admin.site.register(ProductReview, ProductReviewAdmin)
+
+class VendorsAdmin(admin.ModelAdmin):
+    list_display = ('user','store_name','company_name','business_email')
+admin.site.register(Vendors, VendorsAdmin)
+
+class WithrawAdmin(admin.ModelAdmin):
+    list_display = ('user','amount')
+admin.site.register(Withraw, WithrawAdmin)
+
+class TodoAdmin(admin.ModelAdmin):
+    list_display = ('user','todo')
+admin.site.register(Todo, TodoAdmin)
+
+class VendorAddProductAdmin(admin.ModelAdmin):
+    list_display = ('user','product')
+admin.site.register(VendorAddProduct, VendorAddProductAdmin)
+
+class WishlistAdmin(admin.ModelAdmin):
+    list_display = ('user','product')
+admin.site.register(Wishlist, WishlistAdmin)
+
+class BrandAdmin(admin.ModelAdmin):
+    list_display = ('title',)
+admin.site.register(Brand, BrandAdmin)
+
+class SizeAdmin(admin.ModelAdmin):
+    list_display = ('title',)
+admin.site.register(Size, SizeAdmin)

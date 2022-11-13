@@ -41,6 +41,18 @@ urlpatterns = [
     path('checkout-purchasing',views.checkout_purchasing,name='checkout_purchasing'),
     path('display-product',views.display_product,name='display_product'),
     path('data',views.data,name='data'),
+    path('add-wishlist',views.add_wishlist,name='add_wishlist'),
+    path('wishlist',views.wishlist,name='wishlist'),
+    path('store-register',views.store_register,name='store_register'),
+    path('welcome',views.welcome,name='welcome'),
+    path('store',views.store,name='store'),
+    path('store/add-product',views.vendor_add_product,name='vendor_add_product'),
+    path('store/add-attribute',views.vendor_add_attribute,name='vendor_add_attribute'),
+    path('store/todo/delete',views.delete_todo,name='delete_todo'),
+    path('store/order/<int:id>',views.order_details,name='order_details'),
+    path('store/products',views.store_products,name='store_products'),
+    path('store/products/edit/<int:id>',views.vendor_edit_product,name='vendor_edit_product'),
+    path('store/withraw',views.withraw,name='withraw')
 ]
 
 

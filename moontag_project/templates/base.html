@@ -14,6 +14,8 @@
   <!--Custom JS-->
   <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}" />
 	<script type="text/javascript" src="{% static 'custom.js' %}"></script>
+  <script type="text/javascript" src="{% static 'custom2.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'css/reviews.css' %}">
 </head>
 <body>
 	<nav class="navbar navbar-expand-lg navbar-dark bg-danger">
@@ -34,6 +36,14 @@
 		      <li class="nav-item">
 		        <a class="nav-link text-white" href="/">Home</a>
 		      </li>
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+		        <a class="nav-link text-white" href="http://127.0.0.1:8000/welcome" target="_blank">Be seller on Moontag Platform</a>
+		      </li>
+          <li class="nav-item">
+		        <a class="nav-link text-white" href="http://127.0.0.1:8000/store" target="_blank">Already have store ? Go to dashboard</a>
+		      </li>
+          {% endif %}
 		      <li class="nav-item">
 		        <a class="nav-link text-white" href="{% url 'categories' %}">Categories</a>
 		      </li>
@@ -68,7 +78,7 @@
     <footer class="pt-4 my-md-5 pt-md-5 border-top container">
         <div class="row">
           <div class="col-12 col-md">
-            <a href="#">Moontag</a>
+            <a href="/">Moontag</a>
             <small class="d-block mb-3 text-muted">&copy;2022</small>
           </div>
           <div class="col-6 col-md">
