@@ -52,7 +52,7 @@ urlpatterns = [
     path('store/order/<int:id>',views.order_details,name='order_details'),
     path('store/products',views.store_products,name='store_products'),
     path('store/products/edit/<int:id>',views.vendor_edit_product,name='vendor_edit_product'),
-    path('store/withraw',views.withraw,name='withraw')
+    path('store/withraw',views.withraw,name='withraw'),
 ]
 
 
