@@ -44,16 +44,6 @@ REMAMBER:
 """
 
 
-# כדי להגיע לחלק של הריאקט צריך להתחבר 
-
-
-# What i Did untill now for project number 3
-"""
-Product reviews - status: 'False'
-Wishlist - status: 'True'  
-Marketplace - status: 'True'
-"""
-
 
 # Create your views here.
 
@@ -700,12 +690,6 @@ def store(request):
                 orders = CartOrder.objects.filter(id=int(p.in_num[4:]))
                 total_sales += p.total
         after_moontag_commission = total_sales - (int(total_sales) * 0.17)
-        """
-        print(datetime.now().date(),orders)
-        for i in li:
-            for b in i:
-                print(b.order.order_dt.date())
-        """
         if request.method == 'POST':
             new_task = request.POST['todo']
             save_task = Todo.objects.create(user=request.user,todo=new_task)
