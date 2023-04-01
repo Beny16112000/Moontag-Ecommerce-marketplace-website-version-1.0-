@@ -2,22 +2,15 @@ asgiref==3.5.2
 certifi==2022.6.15
 charset-normalizer==2.1.0
 click==8.1.3
-dj-database-url==1.0.0
 Django==4.1.3
 django-clearcache==1.2.1
 django-paypal==2.0
-django-phonenumber-field==7.0.0
-djangorestframework==3.14.0
 Faker==13.15.0
-Flask==2.2.2
 gunicorn==20.1.0
 idna==3.3
 itsdangerous==2.1.2
 Jinja2==3.1.2
 MarkupSafe==2.1.1
-phonenumbers==8.12.56
-phonenumberslite==8.12.56
-Pillow==9.2.0
 python-dateutil==2.8.2
 pytz==2022.2.1
 requests==2.28.1
@@ -25,3 +18,4 @@ six==1.16.0
 sqlparse==0.4.2
 urllib3==1.26.11
 Werkzeug==2.2.2
+Pillow==9.3.0

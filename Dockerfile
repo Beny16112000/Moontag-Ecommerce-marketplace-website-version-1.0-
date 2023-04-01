@@ -1,30 +1,14 @@
 # pull official base image
-FROM python:3.10-alpine
+#FROM python:3.10-slim-buster
 
 # set work directory
-WORKDIR /app
-
-# set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV DEBUG 0
-
-# install psycopg2
-RUN apk update \
-    && apk add --virtual build-essential gcc python3-dev musl-dev \
-    && apk add postgresql-dev \
-    && pip install psycopg2
+#WORKDIR /app
 
 # install dependencies
-COPY ./requirements.txt .
-RUN pip install -r requirements.txt
+#COPY requirements.txt requirements.txt
+#RUN pip install -r requirements.txt
 
 # copy project
-COPY . .
+#COPY . .
 
-# add and run as non-root user
-RUN adduser -D myuser
-USER myuser
-
-# run gunicorn
-CMD gunicorn moontag_project.wsgi:application --bind 0.0.0.0:$PORT
+#CMD ["python3","manage.py","runserver","0.0.0.0:8000"]
